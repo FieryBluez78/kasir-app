@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "vercel-build": "prisma generate && prisma migrate deploy && next build",
     "start": "next start",
     "lint": "next lint",
     "db:push": "prisma db push",
@@ -49,5 +50,8 @@
     "tsx": "^4.19.1",
     "eslint": "^8.57.1",
     "eslint-config-next": "14.2.15"
+  },
+  "prisma": {
+  "seed": "tsx prisma/seed.ts"
   }
 }
