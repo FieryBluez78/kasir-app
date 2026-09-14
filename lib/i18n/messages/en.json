@@ -205,7 +205,7 @@
     "saveSuccess": "Settings saved successfully.",
     "role": "Role (Demo)",
     "roleDesc": "Switch roles to preview the admin vs. cashier experience."
-  },
+    },
   "auth": {
     "loginTitle": "Sign in to Toko Kasir",
     "loginSubtitle": "Sign in with the account your store admin gave you",
@@ -215,7 +215,16 @@
     "invalidCredentials": "Incorrect email or password.",
     "loggingIn": "Signing in...",
     "logout": "Log Out",
-    "loggedInAs": "Signed in as"
+    "loggedInAs": "Signed in as",
+    "myAccount": "My Account",
+    "accountSubtitle": "Update your name, email, or password",
+    "name": "Name",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "newPasswordHint": "Leave blank to keep your current password",
+    "accountUpdateSuccess": "Account updated successfully.",
+    "wrongPassword": "Current password is incorrect.",
+    "emailTaken": "That email is already used by another account."
   },
   "errors": {
     "network": "Couldn't connect to the server. Check your connection.",
