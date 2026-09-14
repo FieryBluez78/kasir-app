@@ -1,0 +1,161 @@
+// Prisma schema for the Store POS & Administration System.
+// Default datasource is SQLite for zero-config local development.
+// For production, switch provider to "postgresql" and set DATABASE_URL accordingly —
+// the models themselves are portable between both.
+//
+// NOTE ON ENUMS: SQLite has no native enum type, and Prisma's `enum` keyword
+// only works with connectors that do (PostgreSQL, MySQL, CockroachDB). To keep
+// this schema usable on SQLite out of the box, the "enum-like" fields below
+// are plain `String` columns with their allowed values documented in a
+// comment, and the matching TypeScript union types live in `types/index.ts`
+// (e.g. `Role`, `StockMovementType`, `DiscountType`, `TransactionStatus`) so
+// the app still gets full compile-time type safety even without a DB-level
+// enum. If you switch `provider` to "postgresql", you can restore real
+// `enum` blocks and reference them from the models instead — both approaches
+// are validated identically by the Zod schemas in `lib/validations/`.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(cuid())
+  name         String
+  email        String        @unique
+  passwordHash String?
+  role         String        @default("CASHIER") // "ADMIN" | "CASHIER"
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  transactions Transaction[]
+  stockMovements StockMovement[]
+  auditLogs    AuditLog[]
+
+  @@map("users")
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id               String            @id @default(cuid())
+  sku              String            @unique
+  name             String
+  description      String?
+  imageUrl         String?
+  costPrice        Int // stored in smallest currency unit (integer Rupiah, no decimals)
+  sellingPrice     Int
+  stock            Int               @default(0)
+  minimumStock     Int               @default(5)
+  categoryId       String?
+  category         Category?         @relation(fields: [categoryId], references: [id])
+  isActive         Boolean           @default(true)
+  deletedAt        DateTime? // soft delete so historical transactions stay intact
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  stockMovements   StockMovement[]
+  transactionItems TransactionItem[]
+
+  @@index([name])
+  @@index([categoryId])
+  @@index([isActive, deletedAt])
+  @@map("products")
+}
+
+model StockMovement {
+  id            String            @id @default(cuid())
+  productId     String
+  product       Product           @relation(fields: [productId], references: [id])
+  type          String            // "RESTOCK" | "ADJUSTMENT_ADD" | "ADJUSTMENT_REMOVE" | "SALE" | "INITIAL" | "RETURN"
+  quantity      Int // always positive; direction is implied by `type`
+  stockBefore   Int
+  stockAfter    Int
+  reason        String?
+  transactionId String?
+  transaction   Transaction?      @relation(fields: [transactionId], references: [id])
+  userId        String?
+  user          User?             @relation(fields: [userId], references: [id])
+  createdAt     DateTime          @default(now())
+
+  @@index([productId])
+  @@index([createdAt])
+  @@map("stock_movements")
+}
+
+model Transaction {
+  id             String            @id @default(cuid())
+  code           String            @unique // human-readable receipt number, e.g. TRX-20260909-001
+  subtotal       Int
+  discountType   String? // "PERCENTAGE" | "FIXED"
+  discountValue  Int? // percentage points (0-100) or fixed Rupiah amount, per discountType
+  discountAmount Int               @default(0)
+  total          Int
+  payment        Int
+  change         Int
+  status         String            @default("COMPLETED") // "COMPLETED" | "VOIDED"
+  userId         String?
+  user           User?             @relation(fields: [userId], references: [id])
+  items          TransactionItem[]
+  stockMovements StockMovement[]
+  createdAt      DateTime          @default(now())
+
+  @@index([createdAt])
+  @@index([status])
+  @@map("transactions")
+}
+
+model TransactionItem {
+  id            String      @id @default(cuid())
+  transactionId String
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  productId     String
+  product       Product     @relation(fields: [productId], references: [id])
+  productName   String // snapshot at time of sale, survives product renames
+  sku           String // snapshot at time of sale
+  quantity      Int
+  unitPrice     Int // selling price snapshot at time of sale
+  unitCost      Int // cost price snapshot, used for historical profit calculation
+  subtotal      Int
+
+  @@index([transactionId])
+  @@index([productId])
+  @@map("transaction_items")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  entityType String // "Product" | "Category" | "Transaction" | ...
+  entityId   String
+  action     String // "CREATE" | "UPDATE" | "DELETE" | "RESTORE"
+  summary    String // short human-readable description of what changed
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model StoreSettings {
+  id          String  @id @default("singleton")
+  storeName   String  @default("Toko Saya")
+  address     String?
+  phone       String?
+  logoUrl     String?
+  currency    String  @default("IDR")
+  taxPercent  Int     @default(0)
+
+  @@map("store_settings")
+}

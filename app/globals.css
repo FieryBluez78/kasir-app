@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Design tokens for "Toko Kasir".
+
+  Palette: a cool blue neutral background/border family paired with a
+  professional royal-blue primary — trustworthy, common in finance/retail
+  tooling without leaning on a generic default blue. Status colors
+  (success/warning/destructive) stay distinct from the brand color so they
+  keep their own meaning at a glance.
+*/
+
+@layer base {
+  :root {
+    --background: 220 20% 97%;
+    --foreground: 222 20% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 20% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 20% 12%;
+
+    --primary: 217 76% 40%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 220 14% 93%;
+    --secondary-foreground: 222 15% 18%;
+
+    --muted: 220 14% 94%;
+    --muted-foreground: 220 9% 42%;
+
+    --accent: 36 78% 49%;
+    --accent-foreground: 30 30% 12%;
+
+    --destructive: 4 70% 50%;
+    --destructive-foreground: 0 0% 98%;
+
+    --success: 152 55% 32%;
+    --success-foreground: 0 0% 98%;
+
+    --warning: 36 78% 49%;
+    --warning-foreground: 30 40% 14%;
+
+    --border: 220 14% 88%;
+    --input: 220 14% 88%;
+    --ring: 217 76% 40%;
+
+    --radius: 0.625rem;
+  }
+
+  .dark {
+    --background: 222 20% 8%;
+    --foreground: 210 15% 94%;
+
+    --card: 222 16% 11%;
+    --card-foreground: 210 15% 94%;
+
+    --popover: 222 16% 11%;
+    --popover-foreground: 210 15% 94%;
+
+    --primary: 217 85% 62%;
+    --primary-foreground: 222 40% 8%;
+
+    --secondary: 222 14% 16%;
+    --secondary-foreground: 210 10% 92%;
+
+    --muted: 222 14% 15%;
+    --muted-foreground: 210 6% 62%;
+
+    --accent: 36 70% 55%;
+    --accent-foreground: 30 40% 10%;
+
+    --destructive: 4 65% 55%;
+    --destructive-foreground: 0 0% 98%;
+
+    --success: 152 50% 45%;
+    --success-foreground: 222 40% 8%;
+
+    --warning: 36 70% 55%;
+    --warning-foreground: 30 40% 10%;
+
+    --border: 222 12% 20%;
+    --input: 222 12% 20%;
+    --ring: 217 85% 62%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+  ::selection {
+    @apply bg-primary/20;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full;
+  }
+  .no-print {
+    display: initial;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white;
+  }
+}
