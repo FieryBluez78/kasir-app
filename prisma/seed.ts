@@ -132,7 +132,7 @@ async function main() {
     },
   ];
 
-  const products = [];
+  const products: Awaited<ReturnType<typeof prisma.product.create>>[] = [];
   for (const p of productSeeds) {
     const product = await prisma.product.create({ data: p });
     await prisma.stockMovement.create({
